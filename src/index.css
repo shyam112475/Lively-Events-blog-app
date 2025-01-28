@@ -1,0 +1,14 @@
+#root{
+    color: #2f3e46;
+    user-select: none;
+    background-color: #fff;
+}
+.active-link {
+    text-decoration: underline;
+    font-weight: bolder;
+
+}
+.inactive-link {
+  text-decoration: none;
+  font-weight: bold;
+}
