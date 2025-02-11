@@ -2,13 +2,12 @@
 import ModeCommentIcon from "@mui/icons-material/ModeComment";
 import ShareIcon from "@mui/icons-material/Share";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-
-
 import {
   Box,
   Typography,
+  CircularProgress,
   Container,
   TextField,
   Card,
@@ -18,19 +17,25 @@ import {
   Grid2,
   Avatar,
   Divider,
-  CssBaseline,
 } from "@mui/material";
-import Data from "../Data";
-
+import {Search } from "@mui/icons-material";
+import { useSelector,useDispatch } from "react-redux";
+import { fetchAuthor } from "../slices/AuthorSlice";
+import { fetchPosts } from "../slices/PostSlice";
 
 function Home() {
- 
- const {posts} = Data(`http://localhost:3000/posts`)
- const slicedData = posts.slice(30,120)
- const {auth} = Data(`http://localhost:3000/authors`)
- 
+  const [search, setSearch] = useState("");
+  const [filteredPosts, setFilteredPosts] = useState("");
+const dispatch = useDispatch()
+ const {posts,status} = useSelector(state=>state.posts)
+ const {authors} = useSelector(state=>state.authors)
+ const slicedData = posts.slice(0,5)
+ useEffect(()=>{
+  dispatch(fetchAuthor())
+  dispatch(fetchPosts())
+ },[dispatch])
  const postByName = slicedData.map((post)=>{
-  const author = auth.find((author)=>author.id==post.authorId)
+  const author = authors.find((author)=>author.id==post.authorId)
   return{
     AuthorName:author.firstName,
     AuthorLastName:author.lastName,
@@ -43,16 +48,9 @@ function Home() {
   }
 })
 
-const getCardColor = (index) => {
-  const colors = ["#ffcccb", "#d1e7dd", "#cfe2ff", "#fef3c7"];
-  return colors[index % colors.length];
-};
- 
-  const latest = [...postByName].sort(() => 0.5 - Math.random());
-  const latestPublished = latest.slice(0, 5);
+  const latestPublished = [...postByName].sort(() => 0.5 - Math.random());
 
-  const [search, setSearch] = useState("");
-  const [filteredPosts, setFilteredPosts] = useState("");
+  
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -63,119 +61,113 @@ const getCardColor = (index) => {
   );
   setFilteredPosts(filtered)
   };
-
   const posttobeshow = search==""?latestPublished:filteredPosts
-
+  if (status === "loading") 
+    return (
+      <Box 
+        sx={{ 
+          display: "flex", 
+          flexDirection: "column", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          height: "50vh" 
+        }}
+      >
+        <CircularProgress size={60} sx={{ color: "#277da1", mb: 2 }} />
+        <Typography 
+          variant="h5" 
+          align="center" 
+          sx={{ 
+            color: "#264653", 
+            fontWeight: "bold", 
+            animation: "fadeIn 1.5s ease-in-out infinite"
+          }}
+        >
+          Loading...
+        </Typography>
+      </Box>
+    );
+  
   return (
     <>
-     <CssBaseline />
-    <Container style={{ background: "#fff", marginTop: "20px" }} maxWidth="lg">
-      <Box sx={{ textAlign: "center", my: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ color: "#1b4965" }}>
-          Welcome to Our Blog
-        </Typography>
-        <TextField
-          variant="outlined"
-          placeholder="search posts...."
-          value={search}
-          onChange={handleSearch}
-          sx={{
-            width: "80%",
-            maxWidth: "500px",
-            mb: 4,
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "25px",
-            },
-          }}
-        />
-      </Box>
-      <Box sx={{ my: 4 }}>
-        <Typography
-          variant="h4"
-          component="h2"
-          gutterBottom
-          sx={{ color: "#1b4965", paddingBottom: "10px" }}
-        >
+      <Container maxWidth="lg" sx={{ background: "#f8fafc", py: 5, borderRadius: 3 }}>
+        <Box textAlign="center" mb={4}>
+          <Typography
+            variant="h3"
+            fontWeight="bold"
+            sx={{ color: "#1b4965", letterSpacing: 1, mb: 2 }}
+          >
+            Welcome to Our Blog 🚀
+          </Typography>
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <TextField
+              variant="outlined"
+              placeholder="Search posts..."
+              value={search}
+              onChange={handleSearch}
+              sx={{
+                width: "80%",
+                maxWidth: "500px",
+                mb: 4,
+                borderRadius: "25px",
+                background: "white",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "25px",
+                },
+              }}
+              InputProps={{ startAdornment: <Search sx={{ mr: 1 }} /> }}
+            />
+          </motion.div>
+        </Box>
+
+        <Typography variant="h4" fontWeight="bold" sx={{ color: "#1b4965", mb: 3 }}>
           Latest Posts
         </Typography>
 
         <Grid2 container spacing={4}>
-          {posttobeshow.map((post,index) => (
+          {posttobeshow.map((post,) => (
             <Grid2 item xs={12} sm={6} md={4} key={post.postId}>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Card sx={{ height: "100%", background:getCardColor(index) }}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Card sx={{ height: "100%", background: "#e3f2fd", borderRadius: 3, boxShadow: 4 }}>
                   <CardContent>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <Avatar
-                        alt={post.author}
-                        src={post.authorAvatar}
-                        sx={{ mr: 2 }}
-                      />
-                        <Typography  variant="subtitle2" color="text.secondary">{`${post.AuthorName} ${post.AuthorLastName}`}</Typography>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Avatar alt={post.AuthorName} src={post.authorAvatar} sx={{ mr: 2 }} />
+                      <Typography variant="subtitle1" fontWeight="bold" color="#0d47a1">
+                        {`${post.AuthorName} ${post.AuthorLastName}`}
+                      </Typography>
                     </Box>
                     <Typography
                       variant="h5"
-                      component="div"
-                      sx={{
-                        textAlign: "center",
-                        marginBottom: 1,
-                        borderBottom: "2px solid #577590",
-                        color: "#277da1",
-                      }}
+                      fontWeight="bold"
+                      textAlign="center"
+                      color="#01579b"
+                      sx={{ borderBottom: "3px solid #0277bd", pb: 1, mb: 1 }}
                     >
                       {post.postTitle}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      paragraph
-                    >
+                    <Typography variant="body2" color="text.secondary" paragraph>
                       <strong>Description:</strong> {post.postDesc}
                     </Typography>
                     <Divider sx={{ my: 2 }} />
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      display="block"
-                      sx={{ marginTop: 1 }}
-                    >
+                    <Typography variant="caption" color="text.secondary">
                       Published: {post.postPublish}
                     </Typography>
                   </CardContent>
-                  <CardActions
-                    sx={{
-                      justifyContent: "flex-start",gap:0,
-                      px: 2,
-                      pb: 2,
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() =>
-                          alert(`You liked post: ${post.postTitle}`)
-                        }
-                      >
-                        <FavoriteIcon sx={{ color: "#ff758f" }} />
+                  <CardActions sx={{ justifyContent: "flex-start", px: 2, pb: 2 }}>
+                    <Box display="flex" alignItems="center">
+                      <IconButton size="small" color="primary">
+                        <FavoriteIcon sx={{ color: "#e91e63" }} />
                       </IconButton>
                       <Typography variant="body2">{post.postlikes}</Typography>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box display="flex" alignItems="center">
                       <IconButton size="small" color="secondary">
-                        <ModeCommentIcon
-                          sx={{ fontSize: 18, color: "#2196F3", mr: 0.5 }}
-                        />
+                        <ModeCommentIcon sx={{ color: "#1565c0" }} />
                       </IconButton>
-                      <Typography variant="body2">
-                        {post.postComments}
-                      </Typography>
+                      <Typography variant="body2">{post.postComments}</Typography>
                     </Box>
                     <IconButton size="small" color="primary">
-                      <ShareIcon />
+                      <ShareIcon sx={{ color: "#00897b" }} />
                     </IconButton>
                   </CardActions>
                 </Card>
@@ -183,9 +175,8 @@ const getCardColor = (index) => {
             </Grid2>
           ))}
         </Grid2>
-      </Box>
-    </Container>
-  </>
+      </Container>
+    </>
 
   );
 }

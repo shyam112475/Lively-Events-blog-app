@@ -6,20 +6,26 @@ import {
   Typography,
   Avatar,
   CssBaseline,
+  CircularProgress,
 } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 function AuthorRegister() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [loading,setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const handleRegister = () => {
-    if ((!firstName, !lastName, !phone)) {
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (!firstName || !lastName || !phone) {
       alert("Please fill all the fields");
+      return;
     }
+    setLoading(true);
     const newAuthor = {
       firstName,
       lastName,
@@ -27,14 +33,19 @@ function AuthorRegister() {
       numLikes: "0",
       numComments: "0",
     };
-      fetch(`http://localhost:3000/authors`, {
+    try {
+      await fetch(`http://localhost:3000/authors`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newAuthor)
-    })
-          setLoading(true)
-          alert('author registerd sucessfully');
-          navigate("/author");
+        body: JSON.stringify(newAuthor),
+      });
+      alert("Author registered successfully");
+      navigate("/author");
+    } catch (error) {
+      alert("Registration failed. Please try again.",error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,18 +53,19 @@ function AuthorRegister() {
       maxWidth="sm"
       sx={{
         mt: 5,
-        backgroundColor: "#f9fafc",
+        backgroundColor: "#ffffff",
         p: 4,
-        borderRadius: 2,
-        boxShadow: 2,
+        borderRadius: 3,
+        boxShadow: 3,
+        textAlign: "center",
       }}
     >
       <CssBaseline />
       <Box textAlign="center" mb={3}>
-        <Avatar sx={{ m: "auto", bgcolor: "#277da1", width: 64, height: 64 }}>
+        <Avatar sx={{ m: "auto", bgcolor: "#277da1", width: 72, height: 72 }}>
           <PersonAddIcon fontSize="large" />
         </Avatar>
-        <Typography variant="h4" component="h1" sx={{ mt: 2 }}>
+        <Typography variant="h4" component="h1" sx={{ mt: 2, fontWeight: "bold" }}>
           Register Author
         </Typography>
       </Box>
@@ -99,12 +111,19 @@ function AuthorRegister() {
           sx={{
             borderRadius: "25px",
             py: 1.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            textTransform: "uppercase",
             "&:hover": {
               backgroundColor: "#206b8c",
             },
           }}
+          disabled={loading}
         >
-          {loading?'wait...':'register'}
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Register"}
         </Button>
       </Box>
     </Container>

@@ -40,12 +40,12 @@ export default function FormDialog(props) {
   };
   return (
     <React.Fragment>
-      <Button variant="outlined" color="success" onClick={handleClickOpen}>
+      <Button variant="contained" sx={{ backgroundColor: "#4CAF50", color: "white", '&:hover': { backgroundColor: "#388E3C" } }} onClick={handleClickOpen}>
         {<UpdateIcon />} Update
       </Button>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle sx={{ bgcolor: "#e9ecef" }}>Update Post</DialogTitle>
-        <DialogContent sx={{ bgcolor: "#e9ecef" }}>
+      <Dialog open={open} onClose={handleClose} sx={{ '& .MuiPaper-root': { borderRadius: "12px" } }}>
+        <DialogTitle sx={{ bgcolor: "#f8f9fa", color: "#333", fontWeight: "bold" }}>Update Post</DialogTitle>
+        <DialogContent sx={{ bgcolor: "#f8f9fa" }}>
           <TextField
             autoFocus
             required
@@ -57,25 +57,25 @@ export default function FormDialog(props) {
             type="text"
             fullWidth
             variant="outlined"
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: "8px" } }}
           />
           <TextField
-            autoFocus
             required
             value={description}
             onChange={(e) => setdescription(e.target.value)}
-           
+            margin="dense"
             type="text"
             fullWidth
             variant="outlined"
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: "8px" } }}
           />
         </DialogContent>
-        <DialogActions sx={{ bgcolor: "#e9ecef" }}>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" onClick={handleUpdate}>
-            Update
-          </Button>
+        <DialogActions sx={{ bgcolor: "#f8f9fa", padding: "16px" }}>
+          <Button onClick={handleClose} sx={{ color: "#6c757d" }}>Cancel</Button>
+          <Button type="submit" onClick={handleUpdate} sx={{ backgroundColor: "#007BFF", color: "white", '&:hover': { backgroundColor: "#0056b3" } }}>Update</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
+
   );
 }
